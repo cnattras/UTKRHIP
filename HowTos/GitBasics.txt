@@ -1,0 +1,26 @@
+git clone https://github.com/cnattras/UTKRHIP
+cd Transverse_energy_analysis
+touch HiFromBen.txt
+git add HiFromBen.txt
+git commit -m 'adding file from Ben'
+git push [enter user name and password]
+
+you should see this on the web page now
+https://github.com/cnattras/UTKRHIP
+
+Then to remove it you should be able to do
+git rm HiFromBen.txt
+git commit -m 'removing file from Ben'
+git push [enter user name and password]
+
+If you make local edits you can do
+git diff (shows all diffs)
+or
+git diff filename (shows just the difference between the official file version on github and your local copy)
+
+If you don't want to commit your changes to that file
+git revert filename
+
+If I make changes and you want to use them
+git pull
+will put them on your local copy of the repository
