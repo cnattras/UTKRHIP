@@ -1,0 +1,35 @@
+Over the course of the summer, you will be implementing the analyses listed below in this version of RIVET
+https://github.com/alisw/rivet-hi
+and make a file to summarize the uncertainties in the JETSCAPE format
+
+James	
+1.  2.76	2014	CMS	Fragmentation functions	http://arxiv.org/abs/1406.0932	Yes	Fragmentation functions
+2.  2.76	2012	CMS	Fragmentation functions	http://arxiv.org/abs/1205.5872	Yes	Fragmentation functions
+This public note may also be useful
+https://cds.cern.ch/record/1558644
+
+Ricardo	
+1.  2.76	2013	ALICE	Charged Jet RAA	http://arxiv.org/abs/1311.0633	Yes	jet RAA
+2.  2.76	2015	ALICE	Full jet RAA	http://arxiv.org/abs/1502.01689	Yes	jet RAA
+May also be useful because it talks about ALICE background method
+http://arxiv.org/abs/1201.2423
+
+Austin	
+1.  2.76	2016	CMS	Jet RAA	https://arxiv.org/abs/1609.05383	Yes	jet RAA
+This public note may also be useful
+https://cds.cern.ch/record/1558644
+
+Jerrica	
+1.  2.76	2014	ATLAS	Jet RAA	https://http//arxiv.org/abs/1411.2357	Yes	jet RAA
+2.  2.76	2012	ATLAS	Jet RAA	http://arxiv.org/abs/1208.1967	Yes	jet RAA
+
+Mariah	
+1.  2.76	2015	ALICE	Charged jet v2	http://arxiv.org/abs/1509.07334	Yes	jet v2
+2.  	2.76	2013	ATLAS	Jet v2	https://arxiv.org/abs/1306.6469	Yes	jet v2
+May also be useful because it talks about ALICE background method
+http://arxiv.org/abs/1201.2423
+
+Unassigned but it'd sure be great if someone did these:
+2.76	2014	ATLAS	Fragmentation functions	http://arxiv.org/abs/1406.2979	Yes	Fragmentation functions
+2.76	2017	ATLAS	Fragmentation functions	https://arxiv.org/abs/1702.00674	Yes	Fragmentation functions
+These might be good for James, Jerrica, or Mariah
