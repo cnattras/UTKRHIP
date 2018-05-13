@@ -1,0 +1,5 @@
+All files are stored on the repository and people checking out the repository download everything.  
+
+It is therefore a good practice to minimize the size of files you check in.  This includes only checking in source code (not compiled versions of code) and using file types which are small.  Text files are great.  Word documents are terrible because they cannot be compressed - if you modify a Word document, the repository will contain both copies rather than a condensed version of the differences.  For repositories with latex sources, only the minimal number of files should be in the repository and the PDF or DVI should NOT be in the repository.  Intermediate files (.aux, .bbl, etc) should also not be in the repository.  For image files, vector formats (EPS, PDF) are preferred, but other versions may be acceptable.  Just please minimize images to the minimum necessary because images are large.
+
+Always comment when you make commits.  You need not make long comments, but they should generally be explanatory.  
