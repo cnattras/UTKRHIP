@@ -1,5 +1,5 @@
 git clone https://github.com/cnattras/UTKRHIP
-cd Transverse_energy_analysis
+cd UTKRHIP
 touch HiFromBen.txt
 git add HiFromBen.txt
 git commit -m 'adding file from Ben'
