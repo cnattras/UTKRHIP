@@ -1,0 +1,17 @@
+There are four power settings.  From left to right these are:
+A.  Heat up water to steam milk
+B.  Off
+C.  Heat up water to make coffee
+D.  Run hot water to make espresso
+
+Please keep the machine off when not in use.  The heating element will burn out if left on continuously.
+
+This is designed as an espresso machine and it will work much better with coffee ground for espresso, although it will work with other grinds.
+
+To make espresso
+1.  Make sure that there is water in the water tank
+2.  Flip the switch to heat the water (setting C).  The red light will be on.
+3.  Wait until the light turns green.
+4.  Put coffee in the filter.  Use the large filter for a double shot and the small filter for a single shot.
+5.  Turn the power setting to make coffee (setting D).  Leave on until as much coffee is dispensed as you would like.
+6.  Clean out coffee filter for the next person.
