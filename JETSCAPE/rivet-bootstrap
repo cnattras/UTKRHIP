@@ -1,0 +1,205 @@
+#! /usr/bin/env bash
+cd "$BUILD_PREFIX"
+git clone https://github.com/alisw/rivet-hi.git
+
+
+
+test -z "$BUILD_PREFIX" && BUILD_PREFIX="$PWD"
+test -z "$INSTALL_PREFIX" && INSTALL_PREFIX="$PWD/local"
+test -z "$MAKE" && MAKE="make -j3"
+
+test -z "$INSTALL_GSL" && INSTALL_GSL="1"
+test -z "$INSTALL_HEPMC" && INSTALL_HEPMC="1"
+test -z "$INSTALL_FASTJET" && INSTALL_FASTJET="1"
+test -z "$INSTALL_YODA" && INSTALL_YODA="1"
+test -z "$INSTALL_RIVET" && INSTALL_RIVET="1"
+
+test -z "$RIVET_VERSION" && RIVET_VERSION="2.6.0" #
+test -z "$YODA_VERSION" && YODA_VERSION="1.7.0" #
+
+test -z "$HEPMC_VERSION" && HEPMC_VERSION="2.06.09" #< TODO: update to 2.07 or 3 when stable releases available
+test -z "$FASTJET_VERSION" && FASTJET_VERSION="3.2.2"
+test -z "$GSL_VERSION" && GSL_VERSION="1.16"
+
+
+## Rivet needs C++11 now: first run a simple test for that
+test -z "$CXX" && CXX="g++"
+echo "int main() { return 0; }" > cxxtest.cc
+CXX11=1
+$CXX -std=c++11 cxxtest.cc -o cxxtest &> /dev/null || CXX11=0
+rm -f cxxtest cxxtest.cc
+if [[ "$CXX11" -ne 1 ]]; then
+    echo "$CXX does not accept the -std=c++11 flag. You need C++ to build Rivet: exiting installation :-("
+    exit 1
+else
+    echo "$CXX accepts the -std=c++11 flag: hurrah! Continuing installation..."
+    echo
+fi
+
+
+## Paths for the case of existing installations
+test -z "$GSLPATH" && GSLPATH="/usr"
+test -z "$HEPMCPATH" && HEPMCPATH="/usr"
+test -z "$FASTJETPATH" && FASTJETPATH="/usr"
+test -z "$YODAPATH" && YODAPATH="/usr"
+
+test -z "$RIVET_CONFFLAGS" && RIVET_CONFFLAGS="" #--enable-unvalidated
+test -z "$YODA_CONFFLAGS" && YODA_CONFFLAGS=""
+
+
+if [[ "$INSTALL_RIVETDEV" -eq "1" ]]; then
+    ## For rivetdev we skip the normal yoda/rivet installation
+    INSTALL_YODA="0"
+    INSTALL_RIVET="0"
+    ## Might need to install some extra toolkit bits for dev mode
+    test -z "$INSTALL_AUTOTOOLS" && INSTALL_AUTOTOOLS="1"
+    test -z "$INSTALL_HG" && INSTALL_HG="1"
+    test -z "$INSTALL_CYTHON" && INSTALL_CYTHON="1"
+fi
+
+## Disable asserts for production running
+export CPPFLAGS="$CPPFLAGS -DNDEBUG"
+
+
+###############
+
+echo "Running Rivet bootstrap script"
+echo "Building Rivet $RIVET_VERSION, YODA $YODA_VERSION"
+
+## Immediate exit on a command (group) failure and optional debug mode
+set -e
+test -n "$DEBUG" && set -x
+export PATH=$INSTALL_PREFIX/bin:$PATH
+
+function wget_untar { wget --no-check-certificate $1 -O- | tar xz; }
+function conf { ./configure --prefix=$INSTALL_PREFIX "$@"; }
+function mmi { $MAKE "$@" && $MAKE install; }
+
+
+## Make installation directory, with an etc subdir so Rivet etc. will install bash completion scripts
+mkdir -p $INSTALL_PREFIX/etc/bash_completion.d
+
+
+## Install GSL
+if [[ "$INSTALL_GSL" -eq "1" ]]; then
+    cd $BUILD_PREFIX
+    test -d gsl-$GSL_VERSION || wget_untar http://ftpmirror.gnu.org/gsl/gsl-$GSL_VERSION.tar.gz
+    cd gsl-$GSL_VERSION
+    conf
+    mmi
+    GSLPATH=$INSTALL_PREFIX
+fi
+
+## Install HepMC
+if [[ "$INSTALL_HEPMC" -eq "1" ]]; then
+    cd $BUILD_PREFIX
+    test -d HepMC-$HEPMC_VERSION || wget_untar http://lcgapp.cern.ch/project/simu/HepMC/download/HepMC-$HEPMC_VERSION.tar.gz
+    cd HepMC-$HEPMC_VERSION
+    conf --with-momentum=GEV --with-length=MM
+    mmi
+    HEPMCPATH=$INSTALL_PREFIX
+fi
+
+## Install FastJet
+if [[ "$INSTALL_FASTJET" -eq "1" ]]; then
+    cd $BUILD_PREFIX
+    test -d fastjet-$FASTJET_VERSION || wget_untar http://www.fastjet.fr/repo/fastjet-$FASTJET_VERSION.tar.gz
+    cd fastjet-$FASTJET_VERSION
+    conf --enable-shared --disable-auto-ptr --enable-allcxxplugins
+    mmi
+    FASTJETPATH=$INSTALL_PREFIX
+fi
+
+## Install YODA
+if [[ "$INSTALL_YODA" -eq "1" ]]; then
+    cd $BUILD_PREFIX
+    test -d YODA-$YODA_VERSION || wget_untar http://www.hepforge.org/archive/yoda/YODA-$YODA_VERSION.tar.gz
+    cd YODA-$YODA_VERSION
+    conf $YODA_CONFFLAGS
+    mmi
+    cp yodaenv.sh $INSTALL_PREFIX/yodaenv.sh
+    YODAPATH=$INSTALL_PREFIX
+fi
+
+## Install Rivet
+if [[ "$INSTALL_RIVET" -eq "1" ]]; then
+    cd $BUILD_PREFIX
+    ##test -d Rivet-$RIVET_VERSION || wget_untar http://www.hepforge.org/archive/rivet/Rivet-$RIVET_VERSION.tar.gz
+    mkdir Rivet-$RIVET_VERSION
+    cp -R ./rivet-hi/* ./Rivet-$RIVET_VERSION/.
+    cd Rivet-$RIVET_VERSION
+    conf $RIVET_CONFFLAGS \
+        --with-yoda=$YODAPATH \
+        --with-hepmc=$HEPMCPATH \
+        --with-fastjet=$FASTJETPATH \
+        --with-gsl=$GSLPATH
+    mmi
+    cp rivetenv.sh rivetenv.csh $INSTALL_PREFIX/
+fi
+
+
+## Following block for dev mode only -- non-developers should ignore
+if [[ "$INSTALL_RIVETDEV" -eq "1" ]]; then
+    ## Install autotools
+    if [[ "$INSTALL_AUTOTOOLS" -eq "1" ]]; then
+        cd $BUILD_PREFIX
+        function _build_autotool() {
+            name=$1-$2
+            if [ ! -e $name ]; then wget_untar http://ftpmirror.gnu.org/$1/$name.tar.gz; fi
+            cd $name
+            ./configure --prefix=$INSTALL_PREFIX
+            mmi
+            cd ..
+        }
+        test -e $INSTALL_PREFIX/bin/m4       || { echo; echo "Building m4"; _build_autotool m4 1.4.17; }
+        test -e $INSTALL_PREFIX/bin/autoconf || { echo; echo "Building autoconf"; _build_autotool autoconf 2.69; }
+        test -e $INSTALL_PREFIX/bin/automake || { echo; echo "Building automake"; _build_autotool automake 1.15; }
+        test -e $INSTALL_PREFIX/bin/libtool  || { echo; echo "Building libtool"; _build_autotool libtool 2.4.6; }
+    fi
+
+    ## Install hg
+    if [[ "$INSTALL_HG" -eq "1" ]]; then
+        cd $BUILD_PREFIX
+        HG_VERSION=2.8.2 # TODO: -> 4.1.3 or similar?
+        test -d mercurial-$HG_VERSION || wget_untar http://mercurial-scm.org/release/mercurial-$HG_VERSION.tar.gz
+        cd mercurial-$HG_VERSION
+        $MAKE PREFIX=$INSTALL_PREFIX install-bin
+    fi
+
+    ## Install Cython
+    if [[ "$INSTALL_CYTHON" -eq "1" ]]; then
+        cd $BUILD_PREFIX
+        CYTHON_VERSION=0.25.1
+        test -d cython-$CYTHON_VERSION || { wget https://github.com/cython/cython/archive/$CYTHON_VERSION.tar.gz -O - | tar xz; }
+        export PATH=$BUILD_PREFIX/cython-$CYTHON_VERSION/bin:$PATH
+        export PYTHONPATH=$BUILD_PREFIX/cython-$CYTHON_VERSION:$PYTHONPATH
+    fi
+
+    ## Install dev YODA
+    cd $BUILD_PREFIX
+    hg clone http://yoda.hepforge.org/hg/yoda -b release-1-6 --insecure
+    cd yoda
+    hg pull -u --insecure
+    autoreconf -i
+    conf $YODA_CONFFLAGS
+    mmi
+    cp yodaenv.sh $INSTALL_PREFIX/yodaenv.sh
+    YODAPATH=$INSTALL_PREFIX
+
+    ## Install dev Rivet
+    cd $BUILD_PREFIX
+    hg clone https://rivet.hepforge.org/hg/rivet -b release-2-5-x --insecure
+    cd rivet
+    hg pull -u --insecure
+    autoreconf -i
+    conf $RIVET_CONFFLAGS \
+        --with-yoda=$YODAPATH \
+        --with-hepmc=$HEPMCPATH \
+        --with-fastjet=$FASTJETPATH \
+        --with-gsl=$GSLPATH
+    mmi
+    cp rivetenv.sh rivetenv.csh $INSTALL_PREFIX/
+fi
+
+## Announce the build success
+echo; echo "All done. Now set some variables in your shell by sourcing $INSTALL_PREFIX/rivetenv.(c)sh"
